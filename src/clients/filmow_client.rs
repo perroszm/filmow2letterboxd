@@ -12,6 +12,8 @@ use crate::fetchers::{
     watched_list_fetcher::WatchedMoviesFetcher, watchlist_fetcher::WatchlistFetcher,
 };
 
+use reqwest::cookie::Jar;
+use reqwest::Url;
 use reqwest::Client;
 
 #[derive(Debug, Clone)]
@@ -21,9 +23,15 @@ pub struct FilmowClient {
 
 impl FilmowClient {
     pub fn new() -> Self {
-        Self {
-            client: Client::new(),
-        }
+        let cookie_name = "cf_clearance";
+        let cookie_value = "DfkD4X2kfSivepeZv3cHyTRIBTCa1Z5yjQdzyiP20X0-1716370473-1.0.1.1-daW1Xtd5myVsBOBAjkkjZtSwUx96Pkp6oe96L74TZSzhoYMlqzxnSAzmnkzkcEuJotS.8sXMlhnMn.FYFsmN7A";
+        let url = "https://filmow.com".parse::<Url>().unwrap();
+
+        let jar = Jar::default();
+        jar.add_cookie_str(&format!("{}={}", cookie_name, cookie_value), &url);
+
+        let client = Client::builder().cookie_store(true).build().unwrap();
+        Self { client: client }
     }
 
     pub async fn get_all_movies_from_watchlist(
